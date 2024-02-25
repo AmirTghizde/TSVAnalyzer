@@ -1,10 +1,12 @@
 package com.amirtghizde.tsvanalyzer.service;
 
-import com.amirtghizde.tsvanalyzer.entity.TSVStatics;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface TSVFileService {
 
-    TSVStatics readTsvFile(String path);
-    void saveTsvFile(String path);
+    List<String[]> readTsvFile(MultipartFile file);
+    void saveTsvFile(MultipartFile file);
 
 }

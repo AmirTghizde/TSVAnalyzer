@@ -3,15 +3,16 @@ package com.amirtghizde.tsvanalyzer.controller;
 import com.amirtghizde.tsvanalyzer.entity.TSVStatics;
 import com.amirtghizde.tsvanalyzer.service.TSVFileService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/v2")
+@RequestMapping("/v1/api")
 public class TSVController {
     private final TSVFileService tsvFileService;
 
@@ -20,10 +21,16 @@ public class TSVController {
         this.tsvFileService = tsvFileService;
     }
 
-//    @PostMapping("/viewStatics")
-//    public ResponseEntity<TSVStatics> viewStatistics(@Valid @RequestBody RegisterDto registerDto) {
-//        Customer customer = customerService.register(registerDto);
-//        CustomerDataDto customerDto = UserMapper.INSTANCE.toCustomerDataDto(customer);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(customerDto);
-//    }
+    @PostMapping(value = "/viewStatics", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<String[]>> viewStatistics(@RequestParam("file") MultipartFile file) {
+        System.out.println(file.getContentType());
+        List<String[]> strings = tsvFileService.readTsvFile(file);
+        return ResponseEntity.ok(strings);
+    }
+
+    @PostMapping(value = "/saveFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> save(@RequestParam("file") MultipartFile file) {
+        tsvFileService.saveTsvFile(file);
+        return ResponseEntity.ok("✅ File added successfully ");
+    }
 }
