@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/v1/api")
@@ -22,10 +23,12 @@ public class TSVController {
     }
 
     @PostMapping(value = "/viewStatics", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<List<String[]>> viewStatistics(@RequestParam("file") MultipartFile file) {
-        System.out.println(file.getContentType());
-        List<String[]> strings = tsvFileService.readTsvFile(file);
-        return ResponseEntity.ok(strings);
+    public ResponseEntity<TSVStatics> viewStatistics(@RequestParam("file") MultipartFile file) {
+        if (!Objects.equals(file.getContentType(), "text/tab-separated-values")) {
+            throw new IllegalArgumentException("Only supported format is TSV");
+        }
+        TSVStatics tsvStatics = tsvFileService.readTsvFile(file);
+        return ResponseEntity.ok(tsvStatics);
     }
 
     @PostMapping(value = "/saveFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
