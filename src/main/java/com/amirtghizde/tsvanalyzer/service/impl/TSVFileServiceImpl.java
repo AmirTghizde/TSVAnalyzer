@@ -5,9 +5,12 @@ import com.amirtghizde.tsvanalyzer.entity.TSVStatics;
 import com.amirtghizde.tsvanalyzer.mapper.TSVFileMapper;
 import com.amirtghizde.tsvanalyzer.repository.TSVFileRepository;
 import com.amirtghizde.tsvanalyzer.service.TSVFileService;
+import com.amirtghizde.tsvanalyzer.utils.exceptions.CustomException;
 import com.amirtghizde.tsvanalyzer.utils.exceptions.DuplicateValueException;
+import jakarta.persistence.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -19,7 +22,7 @@ import java.util.Map;
 @Service
 public class TSVFileServiceImpl implements TSVFileService {
 
-    private TSVFileRepository tsvFileRepository;
+    private final TSVFileRepository tsvFileRepository;
 
     @Autowired
     public TSVFileServiceImpl(TSVFileRepository tsvFileRepository) {
@@ -34,7 +37,7 @@ public class TSVFileServiceImpl implements TSVFileService {
         double totalAmount = 0;
 
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))){
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split("\t");
@@ -43,27 +46,21 @@ public class TSVFileServiceImpl implements TSVFileService {
                 double price = Double.parseDouble(data[2]);
                 totalAmount += price;
 
-                StringBuilder stringBuilder = new StringBuilder();
-                StringBuilder builder = stringBuilder.append(data[1]).append(" ").append(data[2]);
+                StringBuilder builder = new StringBuilder(data[1]).append(" ").append(data[2]);
                 duplicateCountMap.put(builder.toString(), duplicateCountMap.getOrDefault(builder.toString(), 0) + 1);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Error reading TSV file: " + e.getMessage(), e);
+            throw new CustomException("Error while reading TSV file: " + e.getMessage());
         }
 
         int totalRecords = tsvData.size();
-        List<String> duplicateRecords = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : duplicateCountMap.entrySet()) {
-            if (entry.getValue() > 1) {
-                duplicateRecords.add(entry.getKey());
-            }
-        }
+        List<String> duplicateRecords = getDuplicateValues(duplicateCountMap);
 
         return new TSVStatics(totalRecords, totalAmount, duplicateRecords);
     }
 
-
     @Override
+    @Transactional
     public void saveTsvFile(MultipartFile file) {
         Map<String, Integer> duplicateCountMap = new HashMap<>();
 
@@ -74,23 +71,33 @@ public class TSVFileServiceImpl implements TSVFileService {
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split("\t");
 
+                StringBuilder builder = new StringBuilder(data[1]).append(" ").append(data[2]);
+                String record = builder.toString();
 
-                StringBuilder accountNumberBuilder = new StringBuilder();
-                accountNumberBuilder.append(data[1]).append(data[2]);
-                String accountNumber = accountNumberBuilder.toString();
-
-                if (duplicateCountMap.containsKey(accountNumber)) {
-                    throw new DuplicateValueException("Duplicate value found: " + accountNumber);
+                if (duplicateCountMap.containsKey(builder.toString())) {
+                    throw new DuplicateValueException("Duplicate value found: " + record);
                 }
 
-                duplicateCountMap.put(accountNumber, 1);
+                duplicateCountMap.put(record, 1);
                 TSVFile tsvFile = TSVFileMapper.INSTANCE.toEntity(data);
-                tsvFileRepository.save(tsvFile);
-
+                try {
+                    tsvFileRepository.save(tsvFile);
+                } catch (PersistenceException e) {
+                    throw new CustomException(e.getMessage());
+                }
             }
         } catch (IOException e) {
-            // Handle any exceptions
-            e.printStackTrace();
+            throw new CustomException(e.getMessage());
         }
+    }
+
+    protected List<String> getDuplicateValues(Map<String, Integer> duplicateCountMap) {
+        List<String> duplicateRecords = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : duplicateCountMap.entrySet()) {
+            if (entry.getValue() > 1) {
+                duplicateRecords.add(entry.getKey());
+            }
+        }
+        return duplicateRecords;
     }
 }
