@@ -1,7 +1,7 @@
 package com.amirtghizde.tsvanalyzer.service.impl;
 
 import com.amirtghizde.tsvanalyzer.entity.TSVFile;
-import com.amirtghizde.tsvanalyzer.entity.TSVStatics;
+import com.amirtghizde.tsvanalyzer.entity.TSVDetails;
 import com.amirtghizde.tsvanalyzer.mapper.TSVFileMapper;
 import com.amirtghizde.tsvanalyzer.repository.TSVFileRepository;
 import com.amirtghizde.tsvanalyzer.service.TSVFileService;
@@ -30,7 +30,7 @@ public class TSVFileServiceImpl implements TSVFileService {
     }
 
     @Override
-    public TSVStatics readTsvFile(MultipartFile file) {
+    public TSVDetails readTsvFile(MultipartFile file) {
 
         List<String[]> tsvData = new ArrayList<>();
         Map<String, Integer> duplicateCountMap = new HashMap<>();
@@ -56,7 +56,7 @@ public class TSVFileServiceImpl implements TSVFileService {
         int totalRecords = tsvData.size();
         List<String> duplicateRecords = getDuplicateValues(duplicateCountMap);
 
-        return new TSVStatics(totalRecords, totalAmount, duplicateRecords);
+        return new TSVDetails(totalRecords, totalAmount, duplicateRecords);
     }
 
     @Override

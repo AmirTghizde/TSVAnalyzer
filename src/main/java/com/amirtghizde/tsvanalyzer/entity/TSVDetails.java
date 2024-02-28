@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class TSVStatics {
+public class TSVDetails {
 
     private int recordCount;
     private double totalPrice;
