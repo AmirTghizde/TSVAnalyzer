@@ -1,6 +1,7 @@
 package com.amirtghizde.tsvanalyzer.mapper;
 
 import com.amirtghizde.tsvanalyzer.entity.TSVFile;
+import com.amirtghizde.tsvanalyzer.utils.exceptions.CustomException;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -10,7 +11,7 @@ public interface TSVFileMapper {
 
     default TSVFile toEntity(String[] strings) {
         if (strings == null || strings.length < 3) {
-            return null;
+            throw new CustomException("Invalid String array");
         }
 
         TSVFile tsvFile = new TSVFile();
