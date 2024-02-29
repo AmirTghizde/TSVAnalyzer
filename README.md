@@ -1,4 +1,4 @@
-The TSV analyzer is a spring project designed to process TSV files and provide valuable insights.</br>
+The TSV analyzer is a Spring project designed to process TSV files and provide valuable insights.</br>
 It consists of two key methods:
 <hr>
 <ol>
