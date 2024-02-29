@@ -31,7 +31,7 @@ public class TSVController {
 
     @PostMapping(value = "/saveFile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> save(@RequestParam("file") MultipartFile file) {
-        tsvFileService.saveTsvFile(file);
+        tsvFileService.handleSave(file);
         return ResponseEntity.ok("✅ File added successfully ");
     }
 }
