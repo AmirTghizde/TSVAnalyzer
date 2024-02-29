@@ -18,8 +18,7 @@ It consists of two key methods:
   </li>
 </ol>
 
-> :warning: **IMPORTANT**
-> 
+> [!IMPORTANT]\
 > This api only works with TSV files with a specific format.
 > here's the format:
 >
