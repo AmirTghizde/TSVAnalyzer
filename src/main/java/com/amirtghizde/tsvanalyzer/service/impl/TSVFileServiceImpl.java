@@ -76,7 +76,7 @@ public class TSVFileServiceImpl implements TSVFileService {
             }
 
         } catch (IOException e) {
-            throw new CustomException(e.getMessage());
+            throw new CustomException("Error while reading TSV file: " + e.getMessage());
         }
     }
 
@@ -89,7 +89,7 @@ public class TSVFileServiceImpl implements TSVFileService {
         }
     }
 
-    private void checkDuplication(String[] data, Map<String, Integer> duplicateCountMap) {
+    protected void checkDuplication(String[] data, Map<String, Integer> duplicateCountMap) {
 
         /* Makes a key with the values of accountNumber & price
         * checks if the key already exists if yes throws exception
@@ -105,7 +105,7 @@ public class TSVFileServiceImpl implements TSVFileService {
         duplicateCountMap.put(record, 1);
     }
 
-    private void updateDuplicateRecords(String[] data, Map<String, Integer> duplicateCountMap,
+    protected void updateDuplicateRecords(String[] data, Map<String, Integer> duplicateCountMap,
                                         List<String> duplicateRecords) {
 
         /* Makes a key with the values of accountNumber & price
